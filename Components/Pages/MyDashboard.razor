@@ -91,6 +91,7 @@ else
                        <td>
     <a href="/edit-sensor/@sensor.Id" class="btn btn-sm btn-outline-primary">Éditer</a>
 </td>
+<button class="btn btn-sm btn-outline-danger" @onclick="() => deleteSensorAsync(sensor.Id)">Supprimer</button>
                 </tr>
             }
         </tbody>
@@ -148,5 +149,11 @@ else
     private void AddNewSensor(MouseEventArgs args)
     {
         NavManager.NavigateTo("/add-sensor");
+    }
+
+    private async Task deleteSensorAsync(int id)
+    {
+        await SensorService.DeleteSensorAsync(id);
+        await LoadAll(); // Refresh the list after deletion
     }
 }
