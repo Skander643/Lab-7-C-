@@ -1,0 +1,90 @@
+@page "/edit-sensor"
+@page "/edit-sensor/{Id:int}"
+@rendermode InteractiveServer
+
+@using DashboardData.Models
+@using DashboardData.Services
+
+@inject ISensorService SensorService
+@inject NavigationManager NavigationManager
+
+<h3>@(Id.HasValue ? "Modifier le Capteur" : "Ajouter un Nouveau Capteur")</h3>
+
+@if (currentSensor == null)
+{
+    <p><em>Chargement du formulaire...</em></p>
+}
+else
+{
+    <EditForm Model="currentSensor" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" />
+
+        <div class="mb-3">
+            <label class="form-label">Nom du capteur :</label>
+            <InputText @bind-Value="currentSensor.Name" class="form-control" />
+            <ValidationMessage For="@(() => currentSensor.Name)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Localisation :</label>
+            <InputSelect @bind-Value="currentSensor.LocationId" class="form-select">
+                <option value="0">-- Sélectionnez un lieu --</option>
+                @foreach (var loc in Locations)
+                {
+                    <option value="@loc.Id">@loc.Name (@loc.Building)</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => currentSensor.LocationId)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Valeur en cours :</label>
+            <InputNumber @bind-Value="currentSensor.Value" class="form-control" />
+            <ValidationMessage For="@(() => currentSensor.Value)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private SensorData currentSensor;
+    private List<Location> Locations = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Charger les locations
+        Locations = await SensorService.GetLocationsAsync();
+
+        if (Id.HasValue)
+        {
+            // Mode édition
+            currentSensor = await SensorService.GetSensorByIdAsync(Id.Value);
+        }
+        if(currentSensor==null)
+        {
+            // Mode création
+            currentSensor = new SensorData();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (Id.HasValue)
+        {
+            await SensorService.UpdateSensorAsync(currentSensor);
+        }
+        else
+        {
+            await SensorService.AddSensorAsync(currentSensor);
+        }
+
+        NavigationManager.NavigateTo("/dashboard");
+    }
+
+    
+}

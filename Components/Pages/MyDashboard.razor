@@ -60,6 +60,8 @@
     <button class="btn btn-danger" @onclick="LoadCritical">Alerts (> 30.0)</button>
 </div>
 
+<a href="/edit-sensor" class="btn btn-success mb-3">+ Nouveau Capteur</a>
+
 @if (_isLoading)
 {
     <p><em>Chargement des données...</em></p>
@@ -81,10 +83,14 @@ else
         <tbody>
             @foreach (var sensor in Sensors)
             {
+             
                 <tr>
                     <td>@sensor.Name</td>
                     <td>@(sensor.Location?.Name ?? "Undefined")</td>
                     <td>@sensor.Value</td>
+                       <td>
+    <a href="/edit-sensor/@sensor.Id" class="btn btn-sm btn-outline-primary">Éditer</a>
+</td>
                 </tr>
             }
         </tbody>
