@@ -1,0 +1,43 @@
+﻿@using DashboardData.Models
+@using DashboardData.Services
+@page "/add-sensor"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@inject ISensorService SensorService
+@inject NavigationManager NavManager
+
+<PageTitle>Nouveau Sensor</PageTitle>
+<h3>New Sensor : @sensorData.Name</h3>
+ <div class="container-fluid">
+    <div class="mb-3 row">
+        <label for="@nameof(sensorData.Name)" class="col-sm-2 col-form-label">Name</label>
+        <div class="col-sm-10">
+            <InputText class="form-control" @bind-Value="sensorData.Name"/>
+        </div>
+    </div>
+    <div class="mb-3 row">
+        <label for="@nameof(sensorData.Value)" class="col-sm-2 col-form-label">Value</label>
+        <div class="col-sm-10">
+            <InputNumber class="form-control" @bind-Value="sensorData.Value" />
+        </div>
+    </div>
+    
+    <div class="col-12 col-md-12 col-lg-6">
+        <button class="btn btn-primary" type="submit" @onclick="SaveSensor">
+            Save
+        </button>
+        <a href="/dashboard" class="btn btn-outline-secondary">
+            Cancel
+        </a>
+    </div>
+</div>
+
+@code {
+
+    private SensorData sensorData = new();
+    private async void SaveSensor(MouseEventArgs args)
+    {
+        await SensorService.AddSensorAsync(sensorData);
+        NavManager.NavigateTo("/dashboard");
+    }
+}

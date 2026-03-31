@@ -1,0 +1,146 @@
+﻿@page "/dashboard"
+@using DashboardData.Models
+@using DashboardData.Services
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@inject ISensorService SensorService
+@inject NavigationManager NavManager
+
+<PageTitle>Mon Dashboard Data</PageTitle>
+
+<h1>Tableau de Bord</h1>
+
+<div class="alert-info mb-3 p-2">
+    Bienvenue sur l'interface de pilotage.
+    Nous sommes le : <strong>@DateTime.Now.ToString("dd MMM yyyy")</strong>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Total Sensors</h5>
+                <h2>@TotalSensors</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Global Average</h5>
+                <h2>@AverageValue.ToString("F1") °C</h2> <!-- F1 = 1 decimal place -->
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <h5 class="card-title">Max Value</h5>
+                <h2>@MaxValue.ToString("F1") °C</h2> <!-- F1 = 1 decimal place -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    Status du système :
+    @if (IsSystemOK)
+    {
+        <span class="badge bg-success">Opérationnel</span>
+    }
+    else
+    {
+        <span class="badge bg-danger">Erreur Critique</span>
+    }
+</div>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="AddNewSensor">Add New</button>
+    <button class="btn btn-secondary" @onclick="LoadAll">All Sensors</button>
+    <button class="btn btn-danger" @onclick="LoadCritical">Alerts (> 30.0)</button>
+</div>
+
+@if (_isLoading)
+{
+    <p><em>Chargement des données...</em></p>
+}
+else if (Sensors == null)
+{
+    <p>Aucune donnée disponible.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Sensor</th>
+                <th>Location</th>
+                <th>Current Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sensor in Sensors)
+            {
+                <tr>
+                    <td>@sensor.Name</td>
+                    <td>@(sensor.Location?.Name ?? "Undefined")</td>
+                    <td>@sensor.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private bool IsSystemOK = true;
+    private bool _isLoading = true;
+    private List<SensorData>? Sensors;
+
+    private int TotalSensors ;
+    private double AverageValue ;
+
+    private double MaxValue ;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAll();
+        await getTotalSensors();
+        await getAverageValue();
+        await getMaxValue();
+    }
+
+    private async Task LoadAll()
+    {
+        _isLoading = true;
+        Sensors = await SensorService.GetSensorsAsync();
+        _isLoading = false;
+    }
+
+    private async Task LoadCritical()
+    {
+        _isLoading = true;
+        Sensors = await SensorService.GetCriticalSensorsAsync(30.0);
+        _isLoading = false;
+    }
+
+    private async Task getTotalSensors()
+    {
+        TotalSensors = await SensorService.GetTotalCountAsync();
+    }
+
+    private async Task getMaxValue()
+    {
+        MaxValue = await SensorService.GetMaxValueAsync();
+    }
+
+     private async Task getAverageValue()
+    {
+        AverageValue = await SensorService.GetAverageValueAsync();
+    }
+
+
+    private void AddNewSensor(MouseEventArgs args)
+    {
+        NavManager.NavigateTo("/add-sensor");
+    }
+}
