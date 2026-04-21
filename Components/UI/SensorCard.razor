@@ -1,0 +1,29 @@
+@using DashboardData.Models
+
+<div class="card shadow-sm h-100">
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-thermometer-half text-danger" style="font-size: 1.5rem;"></i>
+            <h5 class="card-title mb-0 ms-2">@Sensor.Name</h5>
+        </div>
+        
+        <p class="card-text mb-2">
+            <strong>Value:</strong> 
+            <span class="badge bg-info">@($"{Sensor.Value:F1} °C")</span>
+        </p>
+        
+        @if (Sensor.Location != null)
+        {
+            <p class="card-text mb-0">
+                <small class="text-muted">
+                    <i class="bi bi-geo-alt"></i> @Sensor.Location.Name
+                </small>
+            </p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public SensorData Sensor { get; set; }
+}

@@ -45,6 +45,7 @@ else
         </div>
 
         <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">Annuler</button>
     </EditForm>
 }
 
@@ -83,6 +84,12 @@ else
             await SensorService.AddSensorAsync(currentSensor);
         }
 
+        NavigationManager.NavigateTo("/dashboard");
+    }
+
+    private async Task Cancel(){
+
+        await SensorService.ReloadSensorAsync(currentSensor);
         NavigationManager.NavigateTo("/dashboard");
     }
 

@@ -1,6 +1,7 @@
 ﻿@page "/dashboard"
 @using DashboardData.Models
 @using DashboardData.Services
+@using DashboardData.Components.UI
 @rendermode InteractiveServer
 @attribute [StreamRendering]
 @inject ISensorService SensorService
@@ -15,33 +16,22 @@
     Nous sommes le : <strong>@DateTime.Now.ToString("dd MMM yyyy")</strong>
 </div>
 
+<!-- In MyDashboard.razor -->
 <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary">
-            <div class="card-body">
-                <h5 class="card-title">Total Sensors</h5>
-                <h2>@TotalSensors</h2>
-            </div>
-        </div>
+    <div class="col-md-4 mb-3">
+        <!-- Parameters are passed like simple HTML attributes -->
+        <KpiCard Title="Total Sensors" Value="@TotalSensors.ToString()"
+                 BackgroundColorClass="bg-primary" IconClass="bi-box-seam" />
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-success">
-            <div class="card-body">
-                <h5 class="card-title">Global Average</h5>
-                <h2>@AverageValue.ToString("F1") °C</h2> <!-- F1 = 1 decimal place -->
-            </div>
-        </div>
+    <div class="col-md-4 mb-3">
+        <KpiCard Title="Global Average" Value="@($"{AverageValue:F1} °C")"
+                 BackgroundColorClass="bg-success" IconClass="bi-bullseye" />
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-danger">
-            <div class="card-body">
-                <h5 class="card-title">Max Value</h5>
-                <h2>@MaxValue.ToString("F1") °C</h2> <!-- F1 = 1 decimal place -->
-            </div>
-        </div>
+    <div class="col-md-4 mb-3">
+        <KpiCard Title="Max Alert" Value="@($"{MaxValue:F1} °C")"
+                 BackgroundColorClass="bg-danger" IconClass="bi-exclamation-triangle-fill" />
     </div>
 </div>
-
 <div class="mb-3">
     Status du système :
     @if (IsSystemOK)
@@ -62,6 +52,10 @@
 
 <a href="/edit-sensor" class="btn btn-success mb-3">+ Nouveau Capteur</a>
 
+<button class="btn btn-outline-secondary mb-3" @onclick="() => ShowAsCards = !ShowAsCards">
+    <i class="bi bi-arrow-left-right"></i> Toggle View
+</button>
+
 @if (_isLoading)
 {
     <p><em>Chargement des données...</em></p>
@@ -72,36 +66,29 @@ else if (Sensors == null)
 }
 else
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Sensor</th>
-                <th>Location</th>
-                <th>Current Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var sensor in Sensors)
+    @if (ShowAsCards)
+    {
+        <div class="row">
+            @foreach (var s in Sensors)
             {
-             
-                <tr>
-                    <td>@sensor.Name</td>
-                    <td>@(sensor.Location?.Name ?? "Undefined")</td>
-                    <td>@sensor.Value</td>
-                       <td>
-    <a href="/edit-sensor/@sensor.Id" class="btn btn-sm btn-outline-primary">Éditer</a>
-</td>
-<button class="btn btn-sm btn-outline-danger" @onclick="() => deleteSensorAsync(sensor.Id)">Supprimer</button>
-                </tr>
+                <div class="col-md-3 mb-3">
+                    <SensorCard Sensor="s" />
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    }
+    else
+    {
+        <!-- Link the child's event to the parent's DeleteSensor method -->
+        <SensorTable Sensors="Sensors" OnDeleteClicked="deleteSensorAsync" />
+    }
 }
 
 @code {
     private bool IsSystemOK = true;
     private bool _isLoading = true;
     private List<SensorData>? Sensors;
+    private bool ShowAsCards = false;
 
     private int TotalSensors ;
     private double AverageValue ;

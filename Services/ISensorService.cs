@@ -12,6 +12,8 @@ namespace DashboardData.Services
         Task<double> GetAverageValueAsync();
         Task<double> GetMaxValueAsync();
 
+        Task ReloadSensorAsync(SensorData sensor);
+
         Task<List<Location>> GetLocationsAsync();
         Task<SensorData> GetSensorByIdAsync(int id);
         Task UpdateSensorAsync(SensorData sensor);
@@ -108,6 +110,11 @@ public async Task DeleteSensorAsync(int id)
         await _context.SaveChangesAsync();
     }
 }
+
+public async Task ReloadSensorAsync(SensorData sensor)
+        {
+            await _context.Entry(sensor).ReloadAsync();
+        }
 
     }
 
