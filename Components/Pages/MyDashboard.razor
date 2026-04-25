@@ -97,6 +97,23 @@
     <i class="bi bi-arrow-left-right"></i> Toggle View
 </button>
 
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            @* 
+              @bind="SearchText" : Lie la valeur.
+              @bind:event="oninput" : Met à jour la variable à chaque touche tapée !
+            *@
+            <input type="text" 
+                   @bind="SearchText" 
+                   @bind:event="oninput" 
+                   class="form-control" 
+                   placeholder="Rechercher par nom de capteur..." />
+        </div>
+    </div>
+</div>
+
 @if (_isLoading)
 {
     <p><em>Chargement des données...</em></p>
@@ -138,6 +155,11 @@ else
 
     private List<LocationStat> LocationStats = new();
 
+
+    private List<SensorData> FilteredSensors = new();
+private string _searchText = "";
+private string? SelectedLocationFilter = null;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadAll();
@@ -146,6 +168,7 @@ else
         await getMaxValue();
 
         LocationStats = await SensorService.GetAverageValueByLocationAsync();
+        await ExecuteSearch();
     }
 
     private async Task LoadAll()
@@ -189,26 +212,32 @@ else
         await LoadAll(); // Refresh the list after deletion
     }
 
-private string? SelectedLocationFilter = null;
 
-// Cette méthode sera appelée par Radzen
-private void OnChartClick(SeriesClickEventArgs args)
+
+
+private string SearchText
 {
-    // args.Category contient le nom du lieu cliqué (ex: "Labo")
-    string clickedLocation = args.Category.ToString();
-
-    // Bascule (Toggle) : si on reclique sur le même, on annule le filtre
-    if (SelectedLocationFilter == clickedLocation)
-        SelectedLocationFilter = null;
-    else
-        SelectedLocationFilter = clickedLocation;
+    get => _searchText;
+    set
+    {
+        _searchText = value;
+        _ = ExecuteSearch(); // We relaunch the SQL search
+    }
 }
 
+private async Task OnChartClick(SeriesClickEventArgs args)
+{
+    string clickedLocation = args.Category.ToString();
+    SelectedLocationFilter = SelectedLocationFilter == clickedLocation ? null : clickedLocation;
+    await ExecuteSearch(); // We relaunch the SQL search
+}
+
+private async Task ExecuteSearch()
+{
+    FilteredSensors = await SensorService.SearchSensorsAsync(SelectedLocationFilter, SearchText);
+}   
+
 // On crée une propriété calculée qui filtre la liste pour le tableau
-private List<SensorData> FilteredSensors => SelectedLocationFilter == null 
-     ? Sensors 
-     : Sensors.Where(s => s.Location?.Name == SelectedLocationFilter).ToList();
-    
 
 
 }

@@ -1,22 +1,33 @@
-<div class="col-md-4">
-    <div class="card shadow-sm h-100">
-        <div class="card-header bg-white">
-            <h5 class="mb-0"><i class="bi bi-speedometer2 text-danger"></i> Max Detected Value</h5>
-        </div>
-        <div class="card-body text-center d-flex flex-column justify-content-center">
-            
-            <RadzenRadialGauge Style="width: 100%; height: 250px;">
-                <RadzenRadialGaugeScale StartAngle="0" EndAngle="100" Step="20">
-                    <RadzenRadialGaugeScalePointer Value="@Max" Length="0.6" ShowValue="true" />
-                    <!-- Green zone -->
-                    <RadzenRadialGaugeScaleRange From="0" To="40" Fill="green" />
-                    <!-- Orange zone -->
-                    <RadzenRadialGaugeScaleRange From="40" To="70" Fill="orange" />
-                    <!-- Red zone -->
-                    <RadzenRadialGaugeScaleRange From="70" To="100" Fill="red" />
-                </RadzenRadialGaugeScale>
-            </RadzenRadialGauge>
+// Replace the old logic with this:
+private List<SensorData> FilteredSensors = new();
+private string _searchText = "";
+private string? SelectedLocationFilter = null;
 
-        </div>
-    </div>
-</div>
+// We replace the auto getter with a property having a setter to intercept input
+private string SearchText
+{
+    get => _searchText;
+    set
+    {
+        _searchText = value;
+        _ = ExecuteSearch(); // We relaunch the SQL search
+    }
+}
+
+protected override async Task OnInitializedAsync()
+{
+    await ExecuteSearch();
+}
+
+private async Task OnChartClick(SeriesClickEventArgs args)
+{
+    string clickedLocation = args.Category.ToString();
+    SelectedLocationFilter = SelectedLocationFilter == clickedLocation ? null : clickedLocation;
+    await ExecuteSearch(); // We relaunch the SQL search
+}
+
+// The central method that queries the database
+private async Task ExecuteSearch()
+{
+    FilteredSensors = await SensorService.SearchSensorsAsync(SelectedLocationFilter, SearchText);
+}
