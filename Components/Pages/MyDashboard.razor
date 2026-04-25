@@ -72,6 +72,28 @@
 </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-pie-chart-fill text-success"></i> Sensor Count Distribution</h5>
+            </div>
+            <div class="card-body">
+                <RadzenChart>
+                    <RadzenDonutSeries Data="@CountStats" CategoryProperty="LocationName" ValueProperty="Count">
+                        <TitleTemplate>
+                            <div class="rz-donut-content">
+                                <div>Total</div>
+                                <div>@TotalSondes</div>
+                            </div>
+                        </TitleTemplate>
+                    </RadzenDonutSeries>
+                </RadzenChart>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="mb-3">
     Status du système :
@@ -137,6 +159,8 @@ else
     private double MaxValue ;
 
     private List<LocationStat> LocationStats = new();
+    private List<LocationCountStat> CountStats = new();
+    private int TotalSondes = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -146,6 +170,8 @@ else
         await getMaxValue();
 
         LocationStats = await SensorService.GetAverageValueByLocationAsync();
+        CountStats = await SensorService.GetSensorCountByLocationAsync();
+        TotalSondes = CountStats.Sum(c => c.Count);
     }
 
     private async Task LoadAll()

@@ -20,6 +20,7 @@ namespace DashboardData.Services
         Task DeleteSensorAsync(int id);
 
         Task<List<LocationStat>> GetAverageValueByLocationAsync();
+        Task<List<LocationCountStat>> GetSensorCountByLocationAsync();
 
     }
 
@@ -131,6 +132,20 @@ public async Task ReloadSensorAsync(SensorData sensor)
         })
         .ToListAsync();
 }
+    
+        public async Task<List<LocationCountStat>> GetSensorCountByLocationAsync()
+        {
+            // EF Core traduit ceci en : SELECT Location, COUNT(*) FROM Sensors GROUP BY Location
+            return await _context.Sensors
+                .Include(s => s.Location)
+                .GroupBy(s => s.Location.Name)
+                .Select(g => new LocationCountStat
+                {
+                    LocationName = g.Key ?? "Inconnu",
+                    Count = g.Count()
+                })
+                .ToListAsync();
+        }
 
     }
 
