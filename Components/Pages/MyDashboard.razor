@@ -111,6 +111,12 @@
     <button class="btn btn-primary" @onclick="AddNewSensor">Add New</button>
     <button class="btn btn-secondary" @onclick="LoadAll">All Sensors</button>
     <button class="btn btn-danger" @onclick="LoadCritical">Alerts (> 30.0)</button>
+    <div class="form-check" style="display: inline-block; margin-left: 15px;">
+        <InputCheckbox @bind-Value="ShowCriticalOnly" Class="form-check-input" id="criticalCheckbox" @onchange="ExecuteSearch" />
+        <label class="form-check-label" for="criticalCheckbox">
+            Show alerts (> 30.0)
+        </label>
+    </div>
 </div>
 
 <a href="/edit-sensor" class="btn btn-success mb-3">+ Nouveau Capteur</a>
@@ -216,6 +222,7 @@ else
     }
 
 private string? SelectedLocationFilter = null;
+private bool ShowCriticalOnly = false;
 
 // Cette méthode sera appelée par Radzen
 private void OnChartClick(SeriesClickEventArgs args)
@@ -234,6 +241,14 @@ private void OnChartClick(SeriesClickEventArgs args)
 private List<SensorData> FilteredSensors => SelectedLocationFilter == null 
      ? Sensors 
      : Sensors.Where(s => s.Location?.Name == SelectedLocationFilter).ToList();
+
+// Execute search with critical filter
+private async Task ExecuteSearch()
+{
+    _isLoading = true;
+    Sensors = await SensorService.SearchSensorsAsync(ShowCriticalOnly);
+    _isLoading = false;
+}
     
 
 
