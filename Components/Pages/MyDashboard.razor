@@ -32,6 +32,47 @@
                  BackgroundColorClass="bg-danger" IconClass="bi-exclamation-triangle-fill" />
     </div>
 </div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart-fill text-primary"></i> Températures Moyennes</h5>
+            </div>
+            <div class="card-body">
+                <RadzenChart SeriesClick="@OnChartClick">
+                    <RadzenColumnSeries Data="@LocationStats" CategoryProperty="LocationName" ValueProperty="AverageValue" Title="Moyenne" Fill="#0d6efd" />
+                    <RadzenValueAxis Formatter="@((value) => Math.Round((double)value, 1) + " °C")" />
+                    <RadzenLegend Visible="false" />
+                </RadzenChart>
+            </div>
+        </div>
+    </div>
+   <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-speedometer2 text-danger"></i> Max Detected Value</h5>
+        </div>
+        <div class="card-body text-center d-flex flex-column justify-content-center">
+            
+            <RadzenRadialGauge Style="width: 100%; height: 250px;">
+                <RadzenRadialGaugeScale StartAngle="0" EndAngle="100" Step="20">
+                    <RadzenRadialGaugeScalePointer Value="@MaxValue" Length="0.6" ShowValue="true" />
+                    <!-- Green zone -->
+                    <RadzenRadialGaugeScaleRange From="0" To="40" Fill="green" />
+                    <!-- Orange zone -->
+                    <RadzenRadialGaugeScaleRange From="40" To="70" Fill="orange" />
+                    <!-- Red zone -->
+                    <RadzenRadialGaugeScaleRange From="70" To="100" Fill="red" />
+                </RadzenRadialGaugeScale>
+            </RadzenRadialGauge>
+
+        </div>
+    </div>
+</div>
+</div>
+
+
 <div class="mb-3">
     Status du système :
     @if (IsSystemOK)
@@ -80,7 +121,7 @@ else
     else
     {
         <!-- Link the child's event to the parent's DeleteSensor method -->
-        <SensorTable Sensors="Sensors" OnDeleteClicked="deleteSensorAsync" />
+        <SensorTable Sensors="FilteredSensors" OnDeleteClicked="deleteSensorAsync" />
     }
 }
 
@@ -95,12 +136,16 @@ else
 
     private double MaxValue ;
 
+    private List<LocationStat> LocationStats = new();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadAll();
         await getTotalSensors();
         await getAverageValue();
         await getMaxValue();
+
+        LocationStats = await SensorService.GetAverageValueByLocationAsync();
     }
 
     private async Task LoadAll()
@@ -143,4 +188,27 @@ else
         await SensorService.DeleteSensorAsync(id);
         await LoadAll(); // Refresh the list after deletion
     }
+
+private string? SelectedLocationFilter = null;
+
+// Cette méthode sera appelée par Radzen
+private void OnChartClick(SeriesClickEventArgs args)
+{
+    // args.Category contient le nom du lieu cliqué (ex: "Labo")
+    string clickedLocation = args.Category.ToString();
+
+    // Bascule (Toggle) : si on reclique sur le même, on annule le filtre
+    if (SelectedLocationFilter == clickedLocation)
+        SelectedLocationFilter = null;
+    else
+        SelectedLocationFilter = clickedLocation;
+}
+
+// On crée une propriété calculée qui filtre la liste pour le tableau
+private List<SensorData> FilteredSensors => SelectedLocationFilter == null 
+     ? Sensors 
+     : Sensors.Where(s => s.Location?.Name == SelectedLocationFilter).ToList();
+    
+
+
 }

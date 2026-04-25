@@ -9,7 +9,8 @@
       "DashboardData/1.0.0": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore.Design": "10.0.3",
-          "Microsoft.EntityFrameworkCore.Sqlite": "10.0.3"
+          "Microsoft.EntityFrameworkCore.Sqlite": "10.0.3",
+          "Radzen.Blazor": "10.3.1"
         },
         "runtime": {
           "DashboardData.dll": {}
@@ -420,6 +421,14 @@
           }
         }
       },
+      "Radzen.Blazor/10.3.1": {
+        "runtime": {
+          "lib/net10.0/Radzen.Blazor.dll": {
+            "assemblyVersion": "10.3.1.0",
+            "fileVersion": "10.3.1.0"
+          }
+        }
+      },
       "SQLitePCLRaw.bundle_e_sqlite3/2.1.11": {
         "dependencies": {
           "SQLitePCLRaw.lib.e_sqlite3": "2.1.11",
@@ -771,6 +780,13 @@
       "sha512": "sha512-HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
       "path": "newtonsoft.json/13.0.3",
       "hashPath": "newtonsoft.json.13.0.3.nupkg.sha512"
+    },
+    "Radzen.Blazor/10.3.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-sK4Mtq7xsXmwn+vT5bUSxtD0Z7I0rqI2ONFcg+PHzEwuxqyuXqJQptdsl5ezReA7+SATfF0WW95XsGJ5H+M2kQ==",
+      "path": "radzen.blazor/10.3.1",
+      "hashPath": "radzen.blazor.10.3.1.nupkg.sha512"
     },
     "SQLitePCLRaw.bundle_e_sqlite3/2.1.11": {
       "type": "package",

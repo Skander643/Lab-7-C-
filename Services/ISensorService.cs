@@ -19,6 +19,8 @@ namespace DashboardData.Services
         Task UpdateSensorAsync(SensorData sensor);
         Task DeleteSensorAsync(int id);
 
+        Task<List<LocationStat>> GetAverageValueByLocationAsync();
+
     }
 
     public class SensorService : ISensorService
@@ -115,6 +117,20 @@ public async Task ReloadSensorAsync(SensorData sensor)
         {
             await _context.Entry(sensor).ReloadAsync();
         }
+
+        public async Task<List<LocationStat>> GetAverageValueByLocationAsync()
+{
+    // EF Core traduit ceci en : SELECT Location, AVG(Value) FROM Sensors GROUP BY Location
+    return await _context.Sensors
+        .Include(s => s.Location)
+        .GroupBy(s => s.Location.Name)
+        .Select(g => new LocationStat 
+        { 
+            LocationName = g.Key ?? "Inconnu", 
+            AverageValue = g.Average(s => s.Value) 
+        })
+        .ToListAsync();
+}
 
     }
 

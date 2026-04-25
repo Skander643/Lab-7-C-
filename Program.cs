@@ -3,6 +3,7 @@ using DashboardData.Services;
 using Microsoft.EntityFrameworkCore;
 using DashboardData;
 using DashboardData.Models;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddScoped<ISensorService, SensorService>();
+
+builder.Services.AddRadzenComponents();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>

@@ -30,4 +30,10 @@ namespace DashboardData.Models
 
         public ICollection<SensorValueHistory> Values { get; set; } = new List<SensorValueHistory>();
     }
+
+    public class LocationStat
+{
+    public string LocationName { get; set; }
+    public double AverageValue { get; set; }
+}
 }
